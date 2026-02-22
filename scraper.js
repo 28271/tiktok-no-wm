@@ -90,7 +90,7 @@ export default class TikTokioScraper {
         },
         {
           headers: this.headers,
-          timeout: 10000 // 10 detik timeout
+          timeout: 15000 // 15 detik timeout
         }
       );
 
