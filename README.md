@@ -12,5 +12,5 @@ Download video TikTok tanpa watermark dengan mudah!
 
 ### 1. Fork/Clone repository
 ```bash
-git clone https://github.com/username/tiktok-downloader.git
-cd tiktok-downloader
+git clone https://github.com/28271/tiktok-no-wm.git
+cd tiktok-no-wm.git
