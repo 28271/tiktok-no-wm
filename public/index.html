@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> TikTok Downloader </title>
+    <title>TikTok Downloader </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* CSS tetap sama seperti sebelumnya */
         * {
             margin: 0;
             padding: 0;
@@ -54,13 +53,6 @@
             justify-content: center;
             margin: 0 auto 20px;
             box-shadow: 0 10px 30px rgba(255, 0, 80, 0.3);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
         }
 
         .logo i {
@@ -105,7 +97,6 @@
             border-radius: 60px;
             padding: 5px;
             transition: all 0.3s;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
         }
 
         .url-input-wrapper:focus-within {
@@ -237,7 +228,6 @@
         .download-item:hover {
             border-color: #ff0050;
             transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(255, 0, 80, 0.1);
         }
 
         .download-item i {
@@ -249,7 +239,6 @@
         .download-item h4 {
             color: #333;
             margin-bottom: 8px;
-            font-size: 16px;
         }
 
         .download-link {
@@ -371,11 +360,6 @@
                 width: 150px;
                 height: 200px;
             }
-
-            .features {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
         }
     </style>
 </head>
@@ -387,7 +371,7 @@
             </div>
             <h1>TikTok Downloader</h1>
             <div class="subtitle">
-
+                <span>by <strong>YAMA</strong></span>
                 <span class="badge"><i class="fas fa-check-circle"></i> No Watermark</span>
             </div>
         </div>
@@ -395,7 +379,7 @@
         <div class="input-section">
             <div class="url-input-wrapper">
                 <i class="fab fa-tiktok"></i>
-                <input type="text" class="url-input" id="tiktokUrl" placeholder="Masukkan URL TikTok (cth: https://vt.tiktok.com/...../)" value="https://vt.tiktok.com/ZSmH3AH8q/">
+                <input type="text" class="url-input" id="tiktokUrl" placeholder="Masukkan URL TikTok (cth: https://vt.tiktok.com/ZSrJxqY5S/)">
                 <button class="download-btn" id="downloadBtn">
                     <i class="fas fa-download"></i>
                     <span>Download</span>
@@ -436,8 +420,9 @@
         const downloadOptions = document.getElementById('downloadOptions');
         const imagesGrid = document.getElementById('imagesGrid');
 
-        // Base URL API
-        const BASE_URL = window.location.origin;
+        // Deteksi environment
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const API_URL = isLocal ? 'http://localhost:3000' : ''; // Di Vercel pakai relative URL
 
         // Validasi URL TikTok
         function isValidTikTokUrl(url) {
@@ -449,7 +434,6 @@
             return patterns.some(pattern => pattern.test(url));
         }
 
-        // Tampilkan error
         function showError(message) {
             errorText.textContent = message;
             errorMessage.style.display = 'block';
@@ -457,14 +441,11 @@
             resultCard.style.display = 'none';
         }
 
-        // Sembunyikan error
         function hideError() {
             errorMessage.style.display = 'none';
         }
 
-        // Tampilkan hasil
         function displayResult(data) {
-            // Video info
             videoInfo.innerHTML = `
                 <div class="video-info">
                     <img src="${data.cover || 'https://via.placeholder.com/120x160'}" alt="Cover" class="cover" onerror="this.src='https://via.placeholder.com/120x160'">
@@ -472,7 +453,6 @@
                 </div>
             `;
 
-            // Download options
             let optionsHtml = '<div class="download-options">';
             
             if (data.videos?.nowm) {
@@ -530,7 +510,6 @@
             optionsHtml += '</div>';
             downloadOptions.innerHTML = optionsHtml;
 
-            // Images grid
             if (data.images && data.images.length > 0) {
                 let imagesHtml = '<h3 style="margin: 20px 0 10px; color: #333;">📸 Gambar dari slide:</h3><div class="images-grid">';
                 
@@ -552,9 +531,8 @@
             resultCard.style.display = 'block';
         }
 
-        // Fetch data dari API
         async function fetchTikTokData(url) {
-            const response = await fetch(`${BASE_URL}/api/download`, {
+            const response = await fetch(`/api/download`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -582,7 +560,6 @@
             }
         }
 
-        // Event listener download
         downloadBtn.addEventListener('click', async () => {
             const url = tiktokUrl.value.trim();
 
@@ -596,14 +573,13 @@
                 return;
             }
 
-            // Reset tampilan
             hideError();
             resultCard.style.display = 'none';
             loading.style.display = 'block';
             downloadBtn.disabled = true;
 
             try {
-                console.log('Mengirim request ke:', `${BASE_URL}/api/download`);
+                console.log('Mengirim request...');
                 const data = await fetchTikTokData(url);
                 displayResult(data);
             } catch (error) {
@@ -615,22 +591,19 @@
             }
         });
 
-        // Enter key support
         tiktokUrl.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 downloadBtn.click();
             }
         });
 
-        // Cek koneksi API saat load
         async function checkApiStatus() {
             try {
-                const response = await fetch(`${BASE_URL}/api/status`);
+                const response = await fetch(`/api/status`);
                 const data = await response.json();
                 console.log('✅ API Status:', data.message);
             } catch (error) {
                 console.error('❌ API tidak dapat diakses:', error);
-                showError('Gagal terhubung ke server. Pastikan server sudah berjalan di port 3001');
             }
         }
 
